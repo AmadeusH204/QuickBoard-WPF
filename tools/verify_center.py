@@ -3,7 +3,7 @@ import ctypes, ctypes.wintypes as wt, subprocess, time, json, os, shutil
 u = ctypes.WinDLL("user32", use_last_error=True)
 EnumProc = ctypes.WINFUNCTYPE(ctypes.c_bool, wt.HWND, wt.LPARAM)
 
-QB = r"C:\Users\16797\WorkBuddy\2026-11-17-02-10-40\QuickBoard"
+QB = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 EXE = os.path.join(QB, r"src\QuickBoard\bin\Release\net8.0-windows\QuickBoard.exe")
 CFG = os.path.join(os.environ["APPDATA"], "QuickBoard", "board.json")
 BAK = CFG + ".center-bak"

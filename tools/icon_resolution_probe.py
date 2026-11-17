@@ -161,8 +161,8 @@ SPECIAL_TARGETS = [
     r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Excel.lnk",
     r"D:\App\FeiShu\Feishu.exe",  # 对照
     r"E:\App\FeiShu\icon.ico",
-    r"C:\Users\16797\AppData\Roaming\KRLauncher\C10003\ico\Aki.ico",
-    r"C:\Users\16797",  # 文件夹
+    os.path.join(os.environ["APPDATA"], r"KRLauncher\C10003\ico\Aki.ico"),
+    os.path.expanduser("~"),  # 文件夹
 ]
 
 print("################ 可执行文件 ################")

@@ -24,9 +24,9 @@
 ## 1. 硬约束（违反就是事故）
 
 1. **绝对不要修改或删除原程序的任何文件**：
-   - `D:\App\MadAppLauncher\` 整个目录
-   - `E:\r81\1.mal`（用户当前在用的配置，只读导入）
-   - `C:\Users\16797\AppData\Local\MadAppLauncher\`（favorites.config / iconcache.idb / user.config）
+   - 原版的安装目录（`MadAppLauncher\`）整个目录
+   - 用户当前在用的 `.mal` 配置（只读导入）
+   - `%LOCALAPPDATA%\MadAppLauncher\`（favorites.config / iconcache.idb / user.config）
    历次交付后都核对过这些文件的 mtime 未变，接手后请继续保持。
 2. **不要删除 `<项目>/.workbuddy/` 目录**（记忆与项目数据）。
 3. 原程序是 **GPLv3**。当前 QuickBoard 是干净重写（仅借鉴数据格式），**没有复制其代码**。若后续反编译抄代码进本项目，整个项目就会被 GPL 传染 —— 需要先和用户确认。
@@ -39,18 +39,18 @@
 
 | 项 | 值 |
 |---|---|
-| 项目根 | `C:/Users/16797/WorkBuddy/2026-11-17-02-10-40/QuickBoard` |
-| .NET SDK | **`C:/Users/16797/WorkBuddy/2026-11-17-02-10-40/.dotnet/dotnet.exe`**（8.0.428，本地安装，未装进系统 PATH） |
+| 项目根 | 本仓库根目录（`README.md` / `HANDOFF.md` 所在位置） |
+| .NET SDK | **.NET 8 SDK**（开发时为 8.0.428）。本机未装系统级 SDK，用的是绿色版 `dotnet.exe`，未进 PATH |
 | 目标框架 | `net8.0-windows`，WPF + WinForms（托盘），`ImplicitUsings=disable` |
 | 产物 | `src/QuickBoard/bin/Release/net8.0-windows/QuickBoard.exe` |
 | 依赖 | 零第三方包（BAML/JSON/图标全部用框架 API） |
 
-本机**没有**系统级 dotnet SDK、没有 Visual Studio。所有构建必须用上面那个绝对路径的 exe。
+本机**没有**系统级 dotnet SDK、没有 Visual Studio。下面命令里的 `dotnet` 若不在 PATH，替换成绿色版 SDK 里 `dotnet.exe` 的实际路径即可。
 
 ```bash
-cd "C:/Users/16797/WorkBuddy/2026-11-17-02-10-40/QuickBoard"
+cd <仓库根目录>
 export DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
-"../.dotnet/dotnet.exe" build src/QuickBoard/QuickBoard.csproj -c Release -v q > build.log 2>&1
+dotnet build src/QuickBoard/QuickBoard.csproj -c Release -v q > build.log 2>&1
 grep -E "error|warning CS|已成功生成" build.log | head -10
 ```
 
@@ -63,7 +63,7 @@ Get-Process QuickBoard -ErrorAction SilentlyContinue | Stop-Process -Force
 启动（后台跑，避免阻塞）：
 
 ```bash
-cd "C:/Users/16797/WorkBuddy/2026-11-17-02-10-40/QuickBoard/src/QuickBoard/bin/Release/net8.0-windows" && ./QuickBoard.exe
+cd src/QuickBoard/bin/Release/net8.0-windows && ./QuickBoard.exe
 ```
 
 ---
@@ -273,7 +273,7 @@ QuickBoard/
 sleep 4; cat selftest.txt
 ```
 
-覆盖：导入 `E:/r81/1.mal`、导入 favorites.config、图标提取（4 个样本须 256×256，含文件夹）、配置往返、`Process.Start` 启 notepad 并杀掉、热键注册/注销、键盘三排布局可逆、收藏栏标记、外观参数夹取。
+覆盖：导入 `.mal` 配置、导入 favorites.config、图标提取（4 个样本须 256×256，含文件夹）、配置往返、`Process.Start` 启 notepad 并杀掉、热键注册/注销、键盘三排布局可逆、收藏栏标记、外观参数夹取。
 **基线：9/9 通过。** 若掉项，先修再谈新功能。
 
 ### 8.2 布局探针 `--layoutdump`（判断缩放/对齐/溢出，以数字为准）
