@@ -222,7 +222,7 @@ public partial class App : Application
 
         _tray = new System.Windows.Forms.NotifyIcon
         {
-            Icon = System.Drawing.SystemIcons.Application,
+            Icon = LoadTrayIcon(),
             Text = "QuickBoard",
             Visible = true
         };
@@ -241,6 +241,29 @@ public partial class App : Application
 
         _tray.ContextMenuStrip = menu;
         _tray.DoubleClick += (_, _) => _window?.ToggleVisible();
+    }
+
+    /// <summary>
+    /// 托盘图标取自 exe 内嵌图标（csproj 的 ApplicationIcon），与资源管理器里看到的保持一致。
+    /// 提取失败不影响功能，退回系统通用图标。
+    /// </summary>
+    private static System.Drawing.Icon LoadTrayIcon()
+    {
+        try
+        {
+            var exe = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exe))
+            {
+                var icon = System.Drawing.Icon.ExtractAssociatedIcon(exe);
+                if (icon is not null) return icon;
+            }
+        }
+        catch (Exception)
+        {
+            // 托盘图标不是关键路径，任何异常都退回默认图标
+        }
+
+        return System.Drawing.SystemIcons.Application;
     }
 
     private void ExitApp()

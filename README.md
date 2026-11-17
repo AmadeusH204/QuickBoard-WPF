@@ -1,5 +1,7 @@
 # QuickBoard
 
+<img src="assets/icon-256.png" width="84" alt="QuickBoard 图标">
+
 Windows 键盘启动器：三排键位铺满一屏，按一下 `Q` 启动 QQ。
 
 QuickBoard 是 [MadAppLauncher](https://sourceforge.net/projects/madapplauncher/)（2012 年 VB.NET / WinForms 启动器）的 **.NET 8 + WPF 重写版**。它保留了原版"键位即位置"的使用手感，并补上了原版做不到的部分：任意分组数量、高清图标、自定义背景、主题、配置自愈、导入导出。
@@ -75,8 +77,11 @@ src/QuickBoard/
 └── app.manifest            DPI 感知
 
 tools/                      开发期验证脚本（Python，截图与探针）
+assets/                     图标（README 展示与仓库头像）
 HANDOFF.md                  开发交接文档：每轮改动、根因、实测数据
 ```
+
+图标由 `tools/make_icon.py` 生成（纯标准库逐像素渲染，不依赖任何图像库）：九宫格对应三排键位，中心键用界面强调色 `#5B8DEF`。改配色后重跑脚本即可，会同时产出 7 帧 `.ico` 与两张 PNG。
 
 ## 自检与探针
 
@@ -104,3 +109,9 @@ QuickBoard 是**干净重写**：没有复制 MadAppLauncher 的任何代码，�
 - 分组数量无上限，但键盘直达的只有前 10 组（其余用滚轮）
 - 未做代码签名，首次运行会有 SmartScreen 提示
 - 仓库内不含 `screenshots/`（约 20MB 交付截图），文档中的图片引用只在本机有效
+
+## 许可证
+
+[MIT](LICENSE) © 2026 HeXuan
+
+原版 MadAppLauncher 采用 GPLv3，本项目为干净重写、未复制其代码，因此可独立选择许可证。

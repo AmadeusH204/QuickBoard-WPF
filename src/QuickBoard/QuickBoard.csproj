@@ -11,10 +11,16 @@
     <AssemblyName>QuickBoard</AssemblyName>
     <RootNamespace>QuickBoard</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\QuickBoard.ico</ApplicationIcon>
     <NoWarn>$(NoWarn);WFAC010</NoWarn>
     <Product>QuickBoard</Product>
     <AssemblyTitle>QuickBoard</AssemblyTitle>
     <Version>0.1.0</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 窗口 Icon 走 pack URI，需要作为 WPF 资源打包；ApplicationIcon 同时把 ico 嵌进 exe -->
+    <Resource Include="Assets\QuickBoard.ico" />
+  </ItemGroup>
 
 </Project>

@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:core="clr-namespace:QuickBoard.Core"
         Title="QuickBoard"
+        Icon="Assets/QuickBoard.ico"
         Width="1180" Height="660" MinWidth="720" MinHeight="420"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="CanResize" ShowInTaskbar="False"

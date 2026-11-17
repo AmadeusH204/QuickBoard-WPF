@@ -1069,3 +1069,43 @@ o['HasWindowPosition']=False
 2. 组内排序（按名称/目标）：要先定「排序是否重绑键位」；
 3. 连按两次才启动、鼠标摇动切组：原版有，我们没做（后者建议不做）。
 
+
+---
+
+## 29. 第十七轮：项目图标 + MIT 许可证（2026-11-17 19:56）
+
+### 图标
+
+设计：深色圆角方底（`#20242A`，与磁贴/面板同色）+ 3×3 键帽九宫格（`#F1F3F6`），中心键用界面强调色 `#5B8DEF`。九宫格对应「三排键位」，中心键表示「按下即启动」。没有加任何装饰性元素。
+
+生成方式：`tools/make_icon.py`，**纯标准库**（zlib/struct/math）逐像素渲染，不依赖 Pillow 或任何图像库。圆角矩形用有符号距离函数判定内部，超采样抗锯齿（≤128 用 8×、≤512 用 4×、更大用 2×）。改配色重跑即可，约 5 秒。
+
+产物：
+
+| 文件 | 内容 |
+|---|---|
+| `src/QuickBoard/Assets/QuickBoard.ico` | 7 帧 16/24/32/48/64/128/256，38480 字节；≤64 用 BMP(DIB) 帧，≥128 用 PNG 帧 |
+| `assets/icon-256.png` | README 展示 |
+| `assets/icon-1024.png` | GitHub 仓库头像（需在仓库 Settings 手动上传，API 无写权限） |
+
+小尺寸策略：`size <= 24` 时间隙从 16 放大到 26（设计坐标），否则 16px 下九格会糊成一团。
+
+接入点：
+
+1. `QuickBoard.csproj`：`<ApplicationIcon>Assets\QuickBoard.ico</ApplicationIcon>`（嵌进 exe）+ `<Resource Include="Assets\QuickBoard.ico" />`（供窗口用 pack URI）
+2. `MainWindow.xaml`：`Icon="Assets/QuickBoard.ico"`
+3. `App.xaml.cs`：托盘从 `SystemIcons.Application` 改为 `LoadTrayIcon()` —— 取 `Environment.ProcessPath` 用 `Icon.ExtractAssociatedIcon` 提取，失败回退系统图标。这解决了 §25.6 记的「托盘用通用图标」遗留项。
+
+验证（本机实测）：
+
+- 构建 0 警告 0 错误，exe 191488 字节
+- 逐帧在 exe 二进制中查找字节序列：**7/7 帧命中**，确认图标真的嵌进去了
+- 256px 像素核对：底色 `(32,36,42)`、键帽 `(241,243,246)`、中心键 `(91,141,239)`、四角 alpha=0、左边缘过渡为「透明→底色」无灰晕
+- 16/24/32/48 四档九宫格全部可辨（中心为蓝、其余为白），间隙亮度 36–55，与键帽 240+ 对比充足
+- `--selftest` 16/16；`--boardshot` 成功渲染 1715×752（证明窗口 `Icon` 的 pack URI 可解析，否则会抛 XamlParseException）
+
+**踩坑**：首版渲染全黑。原因是颜色归一化写成 `r / a`，而 `a` 是「命中子样本数 × 255」，导致所有色值被压到 0–1；正确写法是 `r * 255 / a`。
+
+### 许可证
+
+根目录新增 `LICENSE`（MIT，`Copyright (c) 2026 HeXuan`），README 末尾补「许可证」节并注明与原版 GPLv3 的关系：本项目为干净重写、未复制其代码，可独立选择许可证。
