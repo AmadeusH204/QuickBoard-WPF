@@ -1,0 +1,320 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+  <!-- 主题相关资源：默认值=深色；运行时由 Appearance 覆盖，所有引用必须用 DynamicResource -->
+  <sys:Double x:Key="TileIconSize">44</sys:Double>
+  <sys:Double x:Key="FavIconSize">32</sys:Double>
+
+  <!-- 对话框用的底色（默认深色，随主题变化） -->
+  <SolidColorBrush x:Key="BgBrush" Color="#FA151A1F" />
+  <SolidColorBrush x:Key="FieldBgBrush" Color="#FF1B2027" />
+  <SolidColorBrush x:Key="PreviewBgBrush" Color="#FF11161C" />
+  <SolidColorBrush x:Key="TooltipBgBrush" Color="#F21A2027" />
+  <SolidColorBrush x:Key="TooltipBorderBrush" Color="#33FFFFFF" />
+
+  <!-- 主界面用：运行时会被 ThemeRuntime 按「界面不透明度」替换 -->
+  <SolidColorBrush x:Key="PanelBrush" Color="#F2151A1F" />
+  <SolidColorBrush x:Key="SurfaceBrush" Color="#E6222831" />
+  <SolidColorBrush x:Key="TileBrush" Color="#14FFFFFF" />
+  <SolidColorBrush x:Key="TileHoverBrush" Color="#2EFFFFFF" />
+  <SolidColorBrush x:Key="LineBrush" Color="#26FFFFFF" />
+  <SolidColorBrush x:Key="SlotOutlineBrush" Color="#2EFFFFFF" />
+
+  <!-- 文字/字体资源必须定义在所有引用它的样式之前：
+       WPF 的 StaticResource 不允许同字典内的前向引用，ToolTip 等惰性实例化
+       的模板会在首次打开时才解析，前向引用会直接抛 XamlParseException（曾导致偶发崩溃） -->
+  <SolidColorBrush x:Key="TextBrush" Color="#FFF1F3F6" />
+  <SolidColorBrush x:Key="DimBrush" Color="#FF98A0AC" />
+  <SolidColorBrush x:Key="AccentBrush" Color="#FF5B8DEF" />
+  <FontFamily x:Key="UiFont">Microsoft YaHei UI, Segoe UI, Arial</FontFamily>
+
+  <!-- ToolTip 在独立的弹出窗口里实例化，用 DynamicResource 保证运行期一定能找到资源 -->
+  <Style TargetType="ToolTip">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="FontFamily" Value="{DynamicResource UiFont}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="MaxWidth" Value="520" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToolTip">
+          <Border Background="{DynamicResource TooltipBgBrush}" BorderBrush="{DynamicResource TooltipBorderBrush}"
+                  BorderThickness="1" CornerRadius="6" Padding="9,5">
+            <TextBlock Text="{TemplateBinding Content}" TextWrapping="Wrap" MaxWidth="500"
+                       Foreground="{DynamicResource TextBrush}" FontSize="11" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- 右键菜单：浅色底 + 黑色文字（原本文字被隐式 TextBlock 样式染成白色，浅底上完全看不清） -->
+  <Style TargetType="ContextMenu">
+    <Setter Property="Background" Value="#FFF7F9FC" />
+    <Setter Property="BorderBrush" Value="#FFC9D2DD" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="5">
+            <Border.Effect>
+              <DropShadowEffect BlurRadius="12" ShadowDepth="3" Opacity="0.3" Color="#FF000000" />
+            </Border.Effect>
+            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- 菜单项：黑色文字；IsEnabled=False 时淡色（空键位右键时除「编辑…」外全部禁用） -->
+  <Style TargetType="MenuItem">
+    <Setter Property="Foreground" Value="#FF20242A" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="B" Background="Transparent" CornerRadius="5" Margin="1,0" Padding="14,7">
+            <TextBlock x:Name="T" Text="{TemplateBinding Header}" FontSize="12"
+                       Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="B" Property="Background" Value="#FFE8EFFA" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="T" Property="Foreground" Value="#FFA9B0BA" />
+              <Setter Property="Cursor" Value="Arrow" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="Separator">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Separator">
+          <Border Height="1" Background="#FFE3E9F0" Margin="8,4" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+  </Style>
+
+  <Style x:Key="GhostButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource DimBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="10,5" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="B" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="B" Property="Background" Value="#1FFFFFFF" />
+              <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="PillButton" TargetType="Button">
+    <Setter Property="Foreground" Value="{DynamicResource DimBrush}" />
+    <Setter Property="Background" Value="#16FFFFFF" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="13,6" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="B" Background="{TemplateBinding Background}" CornerRadius="14" Padding="{TemplateBinding Padding}">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="B" Property="Background" Value="#26FFFFFF" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsSelected}" Value="True">
+        <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Foreground" Value="#FFFFFFFF" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="TileButton" TargetType="Button">
+    <Setter Property="Background" Value="{DynamicResource TileBrush}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="B" Background="{TemplateBinding Background}" CornerRadius="10"
+                  BorderThickness="1" BorderBrush="Transparent" Padding="0">
+            <!-- 内容必须横向拉伸：否则模板根会按文字自身期望宽度收缩居中，
+                 名称控件的可用宽度就等于它自己的文字宽度，短名称会被二次折行（"UU远程"→"UU远/程"） -->
+            <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="B" Property="Background" Value="{DynamicResource TileHoverBrush}" />
+              <Setter TargetName="B" Property="BorderBrush" Value="#33FFFFFF" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="FieldBox" TargetType="TextBox">
+    <Setter Property="Background" Value="#FF1B2027" />
+    <Setter Property="BorderBrush" Value="#26FFFFFF" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Padding" Value="7,5" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="FieldLabel" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Foreground" Value="{DynamicResource DimBrush}" />
+    <Setter Property="Margin" Value="0,0,0,3" />
+  </Style>
+
+  <Style x:Key="SectionTitle" TargetType="TextBlock">
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="Margin" Value="0,16,0,8" />
+  </Style>
+
+  <Style TargetType="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+
+  <!-- ComboBox 用固定浅色底，文字必须是固定深色（与深浅主题无关）。
+       关键点：全局隐式 TextBlock 样式 Foreground={DynamicResource TextBrush} 会覆盖
+       继承来的 TextElement.Foreground，所以设在 ContentPresenter 上的本地值无效。
+       正解是在 ComboBox / ComboBoxItem 的 Style.Resources 里放局部隐式 TextBlock 样式就近覆盖。 -->
+  <Style TargetType="ComboBox">
+    <Style.Resources>
+      <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="#FF20242A" />
+      </Style>
+    </Style.Resources>
+    <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="#FF20242A" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBox">
+          <Grid>
+            <Border x:Name="B" Background="#FFFFFFFF" BorderBrush="#FFC9D2DD" BorderThickness="1" CornerRadius="4">
+              <Grid>
+                <!-- 直接用 TextBlock + 本地 Foreground：本地值优先级高于全局隐式 TextBlock 样式，
+                     避免 ContentPresenter 自动生成的文字被染成主题白字。选项均为纯字符串。 -->
+                <TextBlock x:Name="ContentSite" IsHitTestVisible="False" Margin="8,3,22,3"
+                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                           Text="{TemplateBinding SelectionBoxItem}" Foreground="#FF20242A" />
+                <ToggleButton x:Name="DropDownToggle" Width="20" Background="Transparent" BorderThickness="0"
+                              HorizontalAlignment="Right" Focusable="False" ClickMode="Press"
+                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                  <Path Data="M 0 0 L 4 4 L 8 0 Z" Fill="#FF555555" HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </ToggleButton>
+              </Grid>
+            </Border>
+            <Popup x:Name="PART_Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False"
+                   PopupAnimation="Slide"
+                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}">
+              <Border Background="#FFFFFFFF" BorderBrush="#FFC9D2DD" BorderThickness="1" CornerRadius="4"
+                      MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" MaxHeight="260">
+                <ScrollViewer>
+                  <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                </ScrollViewer>
+              </Border>
+            </Popup>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="B" Property="BorderBrush" Value="#FF7BA3E0" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="ComboBoxItem">
+    <!-- 下拉项文字固定深色：局部隐式 TextBlock 样式覆盖全局白字样式，Popup 独立可视树内同样生效 -->
+    <Style.Resources>
+      <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="#FF20242A" />
+      </Style>
+    </Style.Resources>
+    <Setter Property="Foreground" Value="#FF20242A" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBoxItem">
+          <Border x:Name="B" Padding="8,5" Background="Transparent" CornerRadius="3">
+            <TextBlock Text="{TemplateBinding Content}" Foreground="#FF20242A"
+                       VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="B" Property="Background" Value="#FFDCE6F5" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="B" Property="Background" Value="#FFE8EFFA" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="Slider">
+    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+    <Setter Property="IsMoveToPointEnabled" Value="True" />
+  </Style>
+
+</ResourceDictionary>

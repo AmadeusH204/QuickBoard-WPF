@@ -1,0 +1,30 @@
+# 构建产物
+bin/
+obj/
+*.exe
+*.pdb
+*.dll
+*.cache
+.vs/
+*.user
+*.suo
+
+# 构建与自检日志
+build.log
+selftest.txt
+
+# 探针输出（可随时重跑生成）
+tools/*.txt
+tools/comboprobe/
+tools/uipreview/
+tools/themeprobe/
+tools/iconprobe-cache/
+tools/menuprobe/
+
+# 交付截图不入库（体积大，见 README）
+screenshots/
+
+# 系统文件
+Thumbs.db
+desktop.ini
+.DS_Store

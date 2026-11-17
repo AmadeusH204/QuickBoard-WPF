@@ -1,0 +1,361 @@
+<Window x:Class="QuickBoard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:core="clr-namespace:QuickBoard.Core"
+        Title="QuickBoard"
+        Width="1180" Height="660" MinWidth="720" MinHeight="420"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="CanResize" ShowInTaskbar="False"
+        SnapsToDevicePixels="True" UseLayoutRounding="True"
+        AllowDrop="True"
+        DragOver="Window_DragOver" Drop="Window_Drop"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        PreviewMouseWheel="Window_PreviewMouseWheel"
+        Deactivated="Window_Deactivated"
+        SourceInitialized="Window_SourceInitialized">
+
+  <Window.Resources>
+    <!-- 磁贴右键菜单：顺序与语义对齐原版 MadAppLauncher（Open location / Edit / Cut / Copy / Paste / Delete） -->
+    <ContextMenu x:Key="TileMenu" x:Shared="False" Opened="ContextMenu_Opened" Closed="ContextMenu_Closed">
+      <MenuItem Header="启动" Click="MenuLaunch_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <MenuItem Header="打开所在位置" Click="MenuOpenLocation_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <MenuItem Header="编辑…" Click="MenuEdit_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <Separator />
+      <MenuItem Header="剪切" Click="MenuCut_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <MenuItem Header="复制" Click="MenuCopy_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <MenuItem Header="粘贴" Click="MenuPaste_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <MenuItem Header="删除" Click="MenuDelete_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <Separator />
+      <MenuItem Header="加入 / 移出收藏栏" Click="MenuToggleFavorite_Click"
+                Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}" />
+      <Separator />
+      <MenuItem Header="设置…" Click="MenuSettings_Click" />
+    </ContextMenu>
+
+    <!-- 键盘网格里的磁贴：图标 + 键位徽标 + 名称 -->
+    <DataTemplate x:Key="TileVisual">
+      <Grid Height="102" ClipToBounds="True">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="70" />
+          <RowDefinition Height="32" />
+        </Grid.RowDefinitions>
+        <Grid>
+          <Image Source="{Binding Icon}" Width="{DynamicResource TileIconSize}" Height="{DynamicResource TileIconSize}"
+                 VerticalAlignment="Center" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+          <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#40000000"
+                  CornerRadius="4" Padding="4,0" Margin="0,2,-2,0">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasKey}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding KeyLabel}" FontSize="10" Foreground="#FFD9DEE5" />
+          </Border>
+        </Grid>
+        <!-- 名称：黑色字 + 细描边 -->
+        <core:OutlinedTextBlock Grid.Row="1" Text="{Binding DisplayName}"
+                                FontSize="{DynamicResource TileNameFontSize}"
+                                LineHeight="{DynamicResource TileNameLineHeight}"
+                                TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                MaxHeight="{DynamicResource TileNameMaxHeight}" Margin="3,0,3,0" Foreground="#FF20242A"
+                                Stroke="#E6FFFFFF" StrokeThickness="1.3" />
+      </Grid>
+    </DataTemplate>
+
+    <!-- 收藏栏磁贴：紧凑一点，一页最多 12 个 -->
+    <DataTemplate x:Key="FavVisual">
+      <Grid Width="72" Height="76" ClipToBounds="True">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="50" />
+          <RowDefinition Height="26" />
+        </Grid.RowDefinitions>
+        <Grid>
+          <Image Source="{Binding Icon}" Width="{DynamicResource FavIconSize}" Height="{DynamicResource FavIconSize}"
+                 VerticalAlignment="Center" HorizontalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+          <Border HorizontalAlignment="Right" VerticalAlignment="Top" Background="#40000000"
+                  CornerRadius="4" Padding="3,0" Margin="0,2,-2,0">
+            <Border.Style>
+              <Style TargetType="Border">
+                <Setter Property="Visibility" Value="Collapsed" />
+                <Style.Triggers>
+                  <DataTrigger Binding="{Binding HasKey}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                  </DataTrigger>
+                </Style.Triggers>
+              </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding KeyLabel}" FontSize="9" Foreground="#FFD9DEE5" />
+          </Border>
+        </Grid>
+        <core:OutlinedTextBlock Grid.Row="1" Text="{Binding DisplayName}"
+                                FontSize="{DynamicResource FavNameFontSize}"
+                                LineHeight="{DynamicResource FavNameLineHeight}"
+                                TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                                MaxHeight="{DynamicResource FavNameMaxHeight}" Margin="2,0,2,0" Foreground="#FF20242A"
+                                Stroke="#E6FFFFFF" StrokeThickness="1.1" />
+      </Grid>
+    </DataTemplate>
+
+    <!-- 一个键盘格位：有条目时显示按钮，空位显示淡淡的虚线框，保证三排与实体键盘对齐。
+         空位同样是按钮：可选中（点击无反应），右键菜单里只有「编辑…」可用 -->
+    <DataTemplate x:Key="TileCell">
+      <Grid Height="104" Margin="2">
+        <Rectangle RadiusX="10" RadiusY="10" Stroke="{DynamicResource SlotOutlineBrush}" Fill="#14000000"
+                   StrokeThickness="1" StrokeDashArray="3 4">
+          <Rectangle.Style>
+            <Style TargetType="Rectangle">
+              <Setter Property="Visibility" Value="Visible" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Rectangle.Style>
+        </Rectangle>
+        <TextBlock Text="{Binding KeyLabel}" FontSize="13" Foreground="{DynamicResource DimBrush}"
+                   Opacity="0.35" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Visible" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <Button Tag="{Binding Tile}" Click="Tile_Click" Height="104"
+                ContextMenu="{StaticResource TileMenu}">
+          <Button.Style>
+            <Style TargetType="Button" BasedOn="{StaticResource TileButton}">
+              <Setter Property="Content" Value="{Binding Tile}" />
+              <Setter Property="ContentTemplate" Value="{StaticResource TileVisual}" />
+              <Setter Property="ToolTip" Value="{Binding Tile.Tip}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="False">
+                  <Setter Property="ToolTip" Value="空键位 · 右键「编辑…」新建，或「粘贴」" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
+      </Grid>
+    </DataTemplate>
+
+    <!-- 收藏栏 F 键格位：F1–F12 固定占位。空位也渲染按钮（可选中、点击无反应），右键仅「编辑…」可用 -->
+    <DataTemplate x:Key="FavCell">
+      <Grid Width="72" Height="78" Margin="2">
+        <Rectangle RadiusX="8" RadiusY="8" Stroke="{DynamicResource SlotOutlineBrush}" Fill="#14000000"
+                   StrokeThickness="1" StrokeDashArray="3 4">
+          <Rectangle.Style>
+            <Style TargetType="Rectangle">
+              <Setter Property="Visibility" Value="Visible" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Rectangle.Style>
+        </Rectangle>
+        <TextBlock Text="{Binding KeyLabel}" FontSize="12" Foreground="{DynamicResource DimBrush}"
+                   Opacity="0.4" HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Setter Property="Visibility" Value="Visible" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <Button Tag="{Binding Tile}" Click="Tile_Click"
+                ContextMenu="{StaticResource TileMenu}">
+          <Button.Style>
+            <Style TargetType="Button" BasedOn="{StaticResource TileButton}">
+              <Setter Property="Content" Value="{Binding Tile}" />
+              <Setter Property="ContentTemplate" Value="{StaticResource FavVisual}" />
+              <Setter Property="ToolTip" Value="{Binding Tile.Tip}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasTile}" Value="False">
+                  <Setter Property="ToolTip" Value="空收藏位 · 右键「编辑…」新建，或「粘贴」" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Button.Style>
+        </Button>
+      </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="ResultCell">
+      <!-- 固定 91 宽：与键盘网格里的磁贴同宽，名称可用宽度才一致（否则名称为自身文字宽度、短名会被二次折行） -->
+      <Button Tag="{Binding}" ToolTip="{Binding Tip}" Click="Tile_Click" Width="91"
+              ContextMenu="{StaticResource TileMenu}"
+              Content="{Binding}" ContentTemplate="{StaticResource TileVisual}"
+              Style="{StaticResource TileButton}" Margin="3" />
+    </DataTemplate>
+  </Window.Resources>
+
+  <!-- 固定设计尺寸 + Viewbox：窗口缩放时所有元素同比例缩放 -->
+  <Viewbox x:Name="ScaleBox" Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Grid Width="1100" Height="610">
+      <!-- 柔和投影层：由 Core/SoftShadow 生成的位图铺成（不占用 WPF 特效缓冲，省约 48MB） -->
+      <Border x:Name="ShadowLayer" Margin="0" IsHitTestVisible="False" SizeChanged="ShadowLayer_SizeChanged" />
+
+      <Border x:Name="RootBorder" Margin="14" CornerRadius="14"
+              Background="{DynamicResource PanelBrush}"
+              BorderThickness="1" BorderBrush="{DynamicResource LineBrush}">
+
+        <Grid>
+          <!-- 自定义背景图 + 压暗层（不挡鼠标） -->
+          <Grid x:Name="PhotoLayer" IsHitTestVisible="False">
+            <Border x:Name="PhotoBrush" CornerRadius="13" Opacity="0" />
+            <Border x:Name="PhotoScrim" CornerRadius="13" Background="#33000000" Opacity="0" />
+          </Grid>
+
+          <Grid Margin="14,12,14,10">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="34" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="*" />
+              <RowDefinition Height="20" />
+            </Grid.RowDefinitions>
+
+            <!-- 顶栏 -->
+            <Grid Grid.Row="0" MouseLeftButtonDown="Header_MouseDown" Background="Transparent">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+
+              <TextBlock Text="QuickBoard" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"
+                         Margin="2,0,14,0" />
+
+              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                          HorizontalAlignment="Right" Margin="0,0,10,0">
+                <Button Content="分组" Style="{StaticResource GhostButton}" Click="BtnGroups_Click"
+                        ToolTip="分组编辑：新增 / 删除 / 隐藏 / 设为主界面" />
+                <Button Content="添加" Style="{StaticResource GhostButton}" Click="BtnAdd_Click" />
+                <Button Content="设置" Style="{StaticResource GhostButton}" Click="BtnSettings_Click" />
+                <Button Content="×" Style="{StaticResource GhostButton}" FontSize="15" Click="BtnClose_Click" />
+              </StackPanel>
+            </Grid>
+
+            <!-- 分组胶囊 -->
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          Margin="0,8,0,0" Height="30">
+              <ItemsControl x:Name="GroupBar">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <Button Style="{StaticResource PillButton}" Content="{Binding Name}" Tag="{Binding Index}"
+                            Margin="0,0,8,0" Click="Group_Click">
+                      <Button.ContextMenu>
+                        <ContextMenu Opened="ContextMenu_Opened" Closed="ContextMenu_Closed">
+                          <MenuItem Header="编辑分组…"
+                                    Tag="{Binding PlacementTarget.Tag, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                    Click="MenuEditGroup_Click" />
+                        </ContextMenu>
+                      </Button.ContextMenu>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </ScrollViewer>
+
+            <!-- 收藏栏：每一页都置顶显示（F1–F12） -->
+            <StackPanel x:Name="FavPanel" Grid.Row="2" Margin="0,8,0,0">
+              <ItemsControl x:Name="FavoritesBar" HorizontalAlignment="Center"
+                            ItemTemplate="{StaticResource FavCell}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+              <TextBlock x:Name="FavHint" FontSize="11" HorizontalAlignment="Center"
+                         Foreground="{DynamicResource DimBrush}" Margin="0,2,0,0"
+                         Text="收藏栏为空：右键任意条目 → 加入收藏栏（绑定 F1–F12）" />
+              <Border Height="1" Background="{DynamicResource LineBrush}" Margin="0,6,0,0" />
+            </StackPanel>
+
+            <!-- 键盘区：三排 × 十列，与实体键盘同排对齐 -->
+            <Grid Grid.Row="3" Margin="0,6,0,0">
+              <ScrollViewer x:Name="KeyboardScroller" VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                  <ItemsControl x:Name="SlotGrid" Height="336" MaxWidth="1020"
+                                HorizontalAlignment="Center" ItemTemplate="{StaticResource TileCell}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <UniformGrid Columns="10" Rows="3" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+
+                  <ItemsControl x:Name="ExtraGrid" HorizontalAlignment="Center" Margin="0,10,0,0"
+                                ItemTemplate="{StaticResource ResultCell}">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" MaxWidth="1060" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                  </ItemsControl>
+
+                  <TextBlock x:Name="ExtraHint" FontSize="10" Foreground="{DynamicResource DimBrush}"
+                             HorizontalAlignment="Center" Margin="0,4,0,0" Visibility="Collapsed" />
+                </StackPanel>
+              </ScrollViewer>
+
+              <TextBlock x:Name="EmptyHint" FontSize="12" Foreground="{DynamicResource DimBrush}"
+                         HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"
+                         Text="这个分组还是空的 —— 把文件拖进来，或点右上角「添加」" />
+            </Grid>
+
+            <!-- 状态栏：左右下角的提示文字加深色半透明底板 + 高对比亮字，
+                 避免叠在明亮背景图上时浅灰字看不清（与主题无关，固定对比色） -->
+            <Grid Grid.Row="4" Margin="0,4,0,0">
+              <Border HorizontalAlignment="Left" VerticalAlignment="Center" CornerRadius="4"
+                      Background="#D60E1218" Padding="7,2">
+                <TextBlock x:Name="StatusText" FontSize="11" Foreground="#FFF1F3F6"
+                           VerticalAlignment="Center" />
+              </Border>
+              <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="4"
+                      Background="#D60E1218" Padding="7,2">
+                <TextBlock x:Name="HintText" FontSize="11" Foreground="#FFF1F3F6"
+                           HorizontalAlignment="Right" VerticalAlignment="Center" />
+              </Border>
+            </Grid>
+          </Grid>
+
+          <!-- 右下角缩放手柄 -->
+          <Path x:Name="ResizeGrip" Data="M 0,14 L 14,0 M 0,7 L 7,0" Stroke="{DynamicResource DimBrush}"
+                StrokeThickness="1.4" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Margin="0,0,5,5" Cursor="SizeNWSE" MouseLeftButtonDown="Grip_MouseDown"
+                ToolTip="拖动调整窗口大小" />
+        </Grid>
+      </Border>
+    </Grid>
+  </Viewbox>
+</Window>

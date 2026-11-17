@@ -1,0 +1,209 @@
+<Window x:Class="QuickBoard.Views.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置" Width="540" SizeToContent="Height"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ResizeMode="NoResize" ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+
+  <Border Margin="14" CornerRadius="12" Background="{DynamicResource BgBrush}"
+          BorderThickness="1" BorderBrush="{DynamicResource LineBrush}">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.45" Color="#FF000000" />
+    </Border.Effect>
+
+    <StackPanel Margin="20,16,20,14">
+      <TextBlock Text="设置" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,6" />
+
+      <ScrollViewer x:Name="SettingsScroller" MaxHeight="620" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel>
+
+          <!-- 常规 -->
+          <TextBlock Text="常规" Style="{StaticResource SectionTitle}" />
+          <UniformGrid Columns="2" Rows="4">
+            <CheckBox x:Name="HideAfterLaunchCheck" Content="启动条目后自动隐藏" Margin="0,0,10,8" />
+            <CheckBox x:Name="HideOnDeactivateCheck" Content="失去焦点时隐藏" Margin="0,0,0,8" />
+            <CheckBox x:Name="AlwaysOnTopCheck" Content="窗口始终置顶" Margin="0,0,10,8" />
+            <CheckBox x:Name="CenterCheck" Content="每次显示都居中" Margin="0,0,0,8" />
+            <CheckBox x:Name="FavoritesBarCheck" Content="显示收藏栏（F1–F12）" Margin="0,0,10,8" />
+            <CheckBox x:Name="TrayCheck" Content="显示托盘图标" Margin="0,0,0,8" />
+            <CheckBox x:Name="StartHiddenCheck" Content="启动时隐藏窗口" Margin="0,0,10,8" />
+            <CheckBox x:Name="StartupCheck" Content="开机自动启动" Margin="0,0,0,8" />
+          </UniformGrid>
+
+          <!-- 外观 -->
+          <TextBlock Text="外观" Style="{StaticResource SectionTitle}" />
+
+          <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Margin="0,0,6,0">
+              <TextBlock Text="配色主题" Style="{StaticResource FieldLabel}" />
+              <ComboBox x:Name="ThemeCombo" Height="26" SelectionChanged="ThemeScale_Changed">
+                <ComboBoxItem Content="深色" />
+                <ComboBoxItem Content="浅色" />
+                <ComboBoxItem Content="跟随系统" />
+              </ComboBox>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Margin="6,0,0,0">
+              <TextBlock Text="图标尺寸" Style="{StaticResource FieldLabel}" />
+              <ComboBox x:Name="IconScaleCombo" Height="26" SelectionChanged="ThemeScale_Changed">
+                <ComboBoxItem Content="紧凑" />
+                <ComboBoxItem Content="标准" />
+                <ComboBoxItem Content="大" />
+              </ComboBox>
+            </StackPanel>
+          </Grid>
+
+          <Grid Margin="0,8,0,4">
+            <TextBlock Text="名称字号" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock x:Name="NameFontLabel" HorizontalAlignment="Right" FontSize="11"
+                       Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+          </Grid>
+          <Slider x:Name="NameFontSlider" Minimum="9" Maximum="13" TickFrequency="1"
+                  IsSnapToTickEnabled="True" Margin="0,0,0,10" ValueChanged="NameFont_Changed" />
+
+          <Grid Margin="0,0,0,4">
+            <TextBlock Text="界面不透明度" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock x:Name="OpacityLabel" HorizontalAlignment="Right" FontSize="11"
+                       Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+          </Grid>
+          <Slider x:Name="OpacitySlider" Minimum="20" Maximum="100" TickFrequency="5"
+                  IsSnapToTickEnabled="True" Margin="0,0,0,10" ValueChanged="Appearance_Changed" />
+
+          <TextBlock Text="背景图片（留空 = 纯色面板）" Style="{StaticResource FieldLabel}" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="ImageBox" Style="{StaticResource FieldBox}" IsReadOnly="True" />
+            <Button Grid.Column="1" Content="浏览…" Style="{StaticResource GhostButton}" Margin="6,0,0,0"
+                    Click="BrowseImage_Click" />
+            <Button Grid.Column="2" Content="清除" Style="{StaticResource GhostButton}" Margin="2,0,0,0"
+                    Click="ClearImage_Click" />
+          </Grid>
+
+          <!-- 背景图预览 + 裁剪 -->
+          <Grid x:Name="BgCropPanel" Margin="0,8,0,4">
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="104" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid Margin="0,0,0,4">
+              <TextBlock Text="预览 / 裁剪（拖动下方滑块选取显示区域）" FontSize="11"
+                         Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+              <ComboBox x:Name="FitCombo" HorizontalAlignment="Right" Width="112" Height="24"
+                        FontSize="11" SelectionChanged="Crop_Changed">
+                <ComboBoxItem Content="铺满(可裁剪)" />
+                <ComboBoxItem Content="完整适应" />
+                <ComboBoxItem Content="拉伸填满" />
+              </ComboBox>
+            </Grid>
+
+            <!-- 预览：显示按当前裁剪设置渲染后的效果 -->
+            <Border x:Name="BgPreview" Grid.Row="1" CornerRadius="6" ClipToBounds="True"
+                    BorderThickness="1" BorderBrush="{DynamicResource LineBrush}" Background="#FF11161C">
+              <Grid>
+                <Border x:Name="BgPreviewImage" />
+                <TextBlock x:Name="BgPreviewHint" Text="未选择背景图" FontSize="12"
+                           Foreground="{DynamicResource DimBrush}" HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+              </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="2" Margin="0,6,0,0">
+              <Grid Margin="0,0,0,2">
+                <TextBlock Text="水平位置 X" FontSize="11" Foreground="{DynamicResource DimBrush}" />
+                <TextBlock x:Name="CropXLabel" HorizontalAlignment="Right" FontSize="11"
+                           Foreground="{DynamicResource DimBrush}" />
+              </Grid>
+              <Slider x:Name="CropXSlider" Minimum="0" Maximum="1" TickFrequency="0.01"
+                      IsSnapToTickEnabled="True" ValueChanged="CropSlider_Changed" />
+              <Grid Margin="0,4,0,2">
+                <TextBlock Text="垂直位置 Y" FontSize="11" Foreground="{DynamicResource DimBrush}" />
+                <TextBlock x:Name="CropYLabel" HorizontalAlignment="Right" FontSize="11"
+                           Foreground="{DynamicResource DimBrush}" />
+              </Grid>
+              <Slider x:Name="CropYSlider" Minimum="0" Maximum="1" TickFrequency="0.01"
+                      IsSnapToTickEnabled="True" ValueChanged="CropSlider_Changed" />
+              <Grid Margin="0,4,0,2">
+                <TextBlock Text="显示宽度" FontSize="11" Foreground="{DynamicResource DimBrush}" />
+                <TextBlock x:Name="CropWLabel" HorizontalAlignment="Right" FontSize="11"
+                           Foreground="{DynamicResource DimBrush}" />
+              </Grid>
+              <Slider x:Name="CropWSlider" Minimum="0.05" Maximum="1" TickFrequency="0.01"
+                      IsSnapToTickEnabled="True" ValueChanged="CropSlider_Changed" />
+              <Grid Margin="0,4,0,2">
+                <TextBlock Text="显示高度" FontSize="11" Foreground="{DynamicResource DimBrush}" />
+                <TextBlock x:Name="CropHLabel" HorizontalAlignment="Right" FontSize="11"
+                           Foreground="{DynamicResource DimBrush}" />
+              </Grid>
+              <Slider x:Name="CropHSlider" Minimum="0.05" Maximum="1" TickFrequency="0.01"
+                      IsSnapToTickEnabled="True" ValueChanged="CropSlider_Changed" />
+              <Button Content="重置裁剪为全图" Style="{StaticResource GhostButton}"
+                      HorizontalAlignment="Right" Margin="0,4,0,0" Padding="10,4"
+                      Click="ResetCrop_Click" />
+            </StackPanel>
+          </Grid>
+
+          <Grid Margin="0,10,0,4">
+            <TextBlock Text="背景图不透明度" FontSize="12" VerticalAlignment="Center" />
+            <TextBlock x:Name="ImageOpacityLabel" HorizontalAlignment="Right" FontSize="11"
+                       Foreground="{DynamicResource DimBrush}" VerticalAlignment="Center" />
+          </Grid>
+          <Slider x:Name="ImageOpacitySlider" Minimum="0" Maximum="100" TickFrequency="5"
+                  IsSnapToTickEnabled="True" Margin="0,0,0,6" ValueChanged="Appearance_Changed" />
+
+          <!-- 热键 -->
+          <TextBlock Text="热键" Style="{StaticResource SectionTitle}" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="HotkeyText" FontSize="12" VerticalAlignment="Center" />
+            <Button Grid.Column="1" Content="修改…" Style="{StaticResource GhostButton}" Click="ChangeHotkey_Click" />
+          </Grid>
+
+          <!-- 数据 -->
+          <TextBlock Text="数据" Style="{StaticResource SectionTitle}" />
+          <WrapPanel Orientation="Horizontal">
+            <Button Content="备份配置" Style="{StaticResource GhostButton}" Click="BackupConfig_Click" />
+            <Button Content="导出配置…" Style="{StaticResource GhostButton}" Margin="2,0,0,0" Click="ExportConfig_Click" />
+            <Button Content="导入配置…" Style="{StaticResource GhostButton}" Margin="2,0,0,0" Click="ImportConfig_Click" />
+            <Button Content="从 .mal 导入…" Style="{StaticResource GhostButton}" Margin="2,0,0,0" Click="ImportMal_Click" />
+            <Button Content="打开配置目录" Style="{StaticResource GhostButton}" Margin="2,0,0,0"
+                    Click="OpenConfigDir_Click" />
+          </WrapPanel>
+          <TextBlock FontSize="11" Foreground="{DynamicResource DimBrush}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     Text="备份/导出会保存当前全部分组与设置；导入会整体替换。程序每次保存也会自动保留上一版 .bak 备份，配置损坏时可自愈。" />
+
+          <!-- 诊断 -->
+          <TextBlock Text="诊断" Style="{StaticResource SectionTitle}" />
+          <Border Background="{DynamicResource PreviewBgBrush}" CornerRadius="6" Padding="10">
+            <StackPanel>
+              <TextBox x:Name="DiagnosticsBox" IsReadOnly="True" Background="Transparent" BorderThickness="0"
+                       Foreground="{DynamicResource DimBrush}" FontFamily="Consolas, Microsoft YaHei UI"
+                       FontSize="11" TextWrapping="Wrap" AcceptsReturn="True" Padding="0"
+                       HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" />
+              <Button Content="刷新诊断" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
+                      Padding="8,3" Margin="0,6,0,0" Click="RefreshDiagnostics_Click" />
+            </StackPanel>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+        <Button Content="取消" Style="{StaticResource GhostButton}" Padding="16,6" Click="Cancel_Click" />
+        <Button Content="保存" Style="{StaticResource PillButton}" Padding="18,6" Margin="8,0,0,0"
+                Click="Save_Click" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>
